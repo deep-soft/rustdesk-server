@@ -1,5 +1,5 @@
 fn main() {
-    let out_dir = format!("{}/protos", std::env::var("OUT_DIR").unwrap());
+    let out_dir = format!("{}/protos", "src");
 
     std::fs::create_dir_all(&out_dir).unwrap();
 
