@@ -1,4 +1,6 @@
 pub mod compress;
+#[path = "./protos/message.rs"]
+#[path = "./protos/rendezvous.rs"]
 pub mod platform;
 pub mod protos;
 pub use bytes;
