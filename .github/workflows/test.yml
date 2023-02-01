@@ -7,15 +7,14 @@ on:
 #  pull_request:
 #    branches: [ "master" ]
 
-uses: rokroskar/workflow-run-cleanup-action
-env:
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  DEBUG: FALSE
-
 jobs:
   check:
     runs-on: ubuntu-latest
     steps:
+      - uses: rokroskar/workflow-run-cleanup-action
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEBUG: FALSE
       - uses: actions/checkout@v3
       - uses: actions-rs/toolchain@v1
         with:
@@ -30,6 +29,10 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
+      - uses: rokroskar/workflow-run-cleanup-action
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEBUG: FALSE
       - uses: actions/checkout@v3
       - uses: actions-rs/toolchain@v1
         with:
@@ -45,6 +48,10 @@ jobs:
   fmt:
     runs-on: ubuntu-latest
     steps:
+      - uses: rokroskar/workflow-run-cleanup-action
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEBUG: FALSE
       - uses: actions/checkout@v3
       - uses: actions-rs/toolchain@v1
         with:
@@ -64,6 +71,10 @@ jobs:
   clippy:
     runs-on: ubuntu-latest
     steps:
+      - uses: rokroskar/workflow-run-cleanup-action
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEBUG: FALSE
       - uses: actions/checkout@v3
       - uses: actions-rs/toolchain@v1
         with:
