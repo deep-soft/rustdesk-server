@@ -8,12 +8,12 @@ services:
   hbbs:
     container_name: hbbs
     ports:
-      - 21115:21115
-      - 21116:21116
-      - 21116:21116/udp
-      - 21118:21118
+      - 39875:39875
+      - 39876:39876
+      - 39876:39876/udp
+      - 39878:39878
     image: rustdesk/rustdesk-server:latest
-    command: hbbs -r rustdesk.example.com:21117
+    command: hbbs -r rustdesk.example.com:39877
     volumes:
       - ./data:/root
     networks:
@@ -25,8 +25,8 @@ services:
   hbbr:
     container_name: hbbr
     ports:
-      - 21117:21117
-      - 21119:21119
+      - 39877:39877
+      - 39879:39879
     image: rustdesk/rustdesk-server:latest
     command: hbbr
     volumes:
