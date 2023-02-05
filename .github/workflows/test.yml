@@ -13,13 +13,13 @@ jobs:
     name: Check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
+      - uses: deep-soft/checkout@v3
+      - uses: deep-soft/rust-toolchain@master
         with:
           profile: minimal
           toolchain: stable
           override: true
-      - uses: actions-rs/cargo@v1
+      - uses: deep-soft/rust-cargo@master      
         with:
           command: check
 
@@ -27,13 +27,13 @@ jobs:
     name: Test Suite
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
+      - uses: deep-soft/checkout@v3
+      - uses: deep-soft/rust-toolchain@master
         with:
           profile: minimal
           toolchain: stable
           override: true
-      - uses: actions-rs/cargo@v1
+      - uses: deep-soft/rust-cargo@master
         with:
           command: test
 
@@ -41,14 +41,14 @@ jobs:
     name: Rustfmt
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
+      - uses: deep-soft/checkout@v3
+      - uses: deep-soft/rust-toolchain@master
         with:
           profile: minimal
           toolchain: stable
           override: true
       - run: rustup component add rustfmt
-      - uses: actions-rs/cargo@v1
+      - uses: deep-soft/rust-cargo@master
         with:
           command: fmt
           args: --all -- --check
@@ -57,14 +57,14 @@ jobs:
     name: Clippy
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
+      - uses: deep-soft/checkout@v3
+      - uses: deep-soft/rust-toolchain@master
         with:
           profile: minimal
           toolchain: stable
           override: true
       - run: rustup component add clippy
-      - uses: actions-rs/cargo@v1
+      - uses: deep-soft/rust-cargo@master
         with:
           command: clippy
           args: -- -D warnings
