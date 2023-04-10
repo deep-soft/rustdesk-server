@@ -1,0 +1,241 @@
+name: srv-Win-cstm
+
+#
+#
+#
+#
+#
+#
+
+on:
+  workflow_dispatch:
+#  push:
+#    tags:
+#      - 'v[0-9]+.[0-9]+.[0-9]+'
+#      - '[0-9]+.[0-9]+.[0-9]+'
+#      - 'v[0-9]+.[0-9]+.[0-9]+-[0-9]+'
+#      - '[0-9]+.[0-9]+.[0-9]+-[0-9]+'
+
+env:
+  # date: 2023.02.24 20:00
+  CARGO_TERM_COLOR: always
+  TAG_NAME: "rdsksrvr-win"
+  LATEST_TAG: latest
+  VERSION: "1.2.0"
+  # To make a custom build with your own servers set the below secret values
+  RS_PUB_KEY: '${{ secrets.RS_PUB_KEY }}'
+  RENDEZVOUS_SERVER: '${{ secrets.RENDEZVOUS_SERVER }}'
+  RDSK_PCH_SH_PRE: '${{ secrets.RDSK_PCH_SH_PRE }}'
+  RDSK_PCH_SH: '${{ secrets.RDSK_PCH_SH }}'
+  RDSK_PCH_HL: '${{ secrets.RDSK_PCH_HL }}'
+  RDSK_PCH_SH2: '${{ secrets.RDSK_PCH_SH2 }}'
+  RDSK_PCH_SH_CLN: '${{ secrets.RDSK_PCH_SH_CLN }}'
+
+jobs:
+
+  # binary build
+
+  build-win:
+    name: Build - windows
+#    runs-on: windows-2019 
+    runs-on: windows-2022
+    steps:
+      
+      - name: Checkout
+        uses: deep-soft/checkout@v3
+
+      - name: Create source archive
+        continue-on-error: true
+        shell: bash
+        run: |
+          staging="rdsk-srv-src-${{ env.VERSION }}-win"
+          7z a "$staging.zip" "*"
+          echo "ASSET_SRC=$staging.zip" >> $GITHUB_ENV
+          echo "source archive name:"
+          ls -l "$staging.zip"
+          #ls -l ${{ env.ASSET_SRC }} 
+
+      - name: Prepare for patch 1
+        continue-on-error: true
+        shell: bash
+        run: |
+          echo "$RDSK_PCH_SH_PRE" | base64 --decode > ./RDSK_PCH_SH_PRE.sh
+          echo "$RDSK_PCH_SH" | base64 --decode > ./RDSK_PCH_SH.sh
+          echo "$RDSK_PCH_HL" | base64 --decode > ./RDSK_PTCH_HL.txt
+          echo prepatch 1 run
+          bash ./RDSK_PCH_SH_PRE.sh
+          echo Done prepatch 1
+          if [ "${{ env.DEBUG_LS }}" = "yes" ]; then
+            ls -l
+            pwd
+          fi
+
+      - name: Apply patch 1
+        # continue-on-error: true
+        shell: bash
+        env: 
+          SED_EXE: ${{ env.SED_EXE }}
+        run: |
+          echo patch 1 run_1
+          bash ./RDSK_PCH_SH.sh
+          echo patch 1 run_2
+          bash ./RDSK_PCH_SH.sh
+          echo patch 1 run_3
+          bash ./RDSK_PCH_SH.sh
+          echo Done patch 1
+          #cat ./libs/hbb_common/src/config.rs
+
+      - name: Cleanup after patch
+        continue-on-error: true
+        shell: bash
+        run: |
+          echo "$RDSK_PCH_SH_CLN" | base64 --decode > ./RDSK_PCH_SH_CLN.sh
+          bash ./RDSK_PCH_SH_CLN.sh
+
+      - name: Create source archive 1
+        continue-on-error: true
+        shell: bash
+        run: |
+          staging="rdsk-srv-src1-${{ env.VERSION }}-win"
+          7z a "$staging.zip" "*"
+          echo "ASSET_SRC1=$staging.zip" >> $GITHUB_ENV
+          echo "source archive name:"
+          ls -l "$staging.zip"
+          ls -l ${{ env.ASSET_SRC1 }} 
+
+      - name: Publish src archives
+        continue-on-error: true
+        uses: deep-soft/action-gh-release@v1
+        with:
+          draft: true
+          tag_name: ${{ env.TAG_NAME }}
+          files: |
+            ${{ env.ASSET_SRC }}
+            ${{ env.ASSET_SRC1 }}
+
+      - name: Install toolchain
+        uses: deep-soft/rust-toolchain@master
+        with:
+          toolchain: "1.62"
+          override: true
+          default: true
+          components: rustfmt
+          profile: minimal
+          target: x86_64-pc-windows-msvc
+
+      - name: Build
+        uses: deep-soft/rust-cargo@master
+        with:
+          command: build
+          args: --release --all-features --target=x86_64-pc-windows-msvc
+          use-cross: true
+
+      - name: Install NSIS
+        run: |
+          iwr -useb get.scoop.sh -outfile 'install.ps1'
+          .\install.ps1 -RunAsAdmin
+          scoop update
+          scoop bucket add extras
+          scoop install nsis
+
+      - name: Install Node.js
+        uses: deep-soft/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Sign exe files
+        uses: deep-soft/code-sign-action@master
+        with:
+          certificate: '${{ secrets.WINDOWS_PFX_BASE64 }}'
+          password: '${{ secrets.WINDOWS_PFX_PASSWORD }}'
+          certificatesha1: '${{ secrets.WINDOWS_PFX_SHA1_THUMBPRINT }}'
+          folder: 'target\x86_64-pc-windows-msvc\release'
+          recursive: false
+
+      - name: Build UI browser file
+        run: |
+          npm i
+          npm run build
+        working-directory: ./ui/html
+
+      - name: Build UI setup file
+        run: |
+          rustup default nightly
+          cargo build --release
+          xcopy /y ..\target\x86_64-pc-windows-msvc\release\*.exe setup\bin\
+          xcopy /y target\release\*.exe setup\
+          mkdir setup\logs
+          makensis /V1 setup.nsi
+          mkdir SignOutput
+          mv RustDeskServer.Setup.exe SignOutput\
+          mv ..\target\x86_64-pc-windows-msvc\release\*.exe SignOutput\
+        working-directory: ./ui
+
+      - name: Sign UI setup file 
+        uses: deep-soft/code-sign-action@master
+        with:
+          certificate: '${{ secrets.WINDOWS_PFX_BASE64 }}'
+          password: '${{ secrets.WINDOWS_PFX_PASSWORD }}'
+          certificatesha1: '${{ secrets.WINDOWS_PFX_SHA1_THUMBPRINT }}'
+          folder: './ui/SignOutput'
+          recursive: false
+
+      - name: Publish Artifacts
+        uses: deep-soft/upload-artifact@v3
+        with:
+          name: binaries-windows-x86_64
+          path: |
+            ui\SignOutput\hbbr.exe
+            ui\SignOutput\hbbs.exe
+            ui\SignOutput\rustdesk-utils.exe
+            ui\SignOutput\RustDeskServer.Setup.exe
+          if-no-files-found: error
+
+      - name: Create Release
+        uses: deep-soft/action-gh-release@v1
+        with:
+          draft: true
+          tag_name: ${{ env.TAG_NAME }}
+          files: |
+            ${{ env.ASSET_SRC }}
+            ${{ env.ASSET_SRC1 }}
+
+  # github (draft) release with all binaries
+  release:
+
+    name: Github release
+    needs: 
+      - build-win
+    runs-on: ubuntu-18.04
+    strategy:
+      fail-fast: false
+      matrix:
+        job:
+          - { os: "windows", name: "x86_64" }
+
+    steps:
+
+      - name: Download binaries (${{ matrix.job.os }} - ${{ matrix.job.name }})
+        uses: deep-soft/download-artifact@main
+        with:
+          name: binaries-${{ matrix.job.os }}-${{ matrix.job.name }}
+          path: ${{ matrix.job.name }}
+
+      - name: Exec chmod
+        run: chmod -v a+x ${{ matrix.job.name }}/*
+
+      - name: Pack files (${{ matrix.job.os }} - ${{ matrix.job.name }})
+        run: |
+          sudo apt update
+          DEBIAN_FRONTEND=noninteractive sudo apt install -y zip
+          zip ${{ matrix.job.name }}/rustdesk-server-${{ matrix.job.os }}-${{ matrix.job.name }}.zip ${{ matrix.job.name }}/*
+
+      - name: Create Release (${{ matrix.job.os }} - (${{ matrix.job.name }})
+        uses: deep-soft/action-gh-release@v1
+        with:
+          draft: true
+          tag_name: ${{ env.TAG_NAME }}
+          files: |
+            ${{ matrix.job.name }}/rustdesk-server-${{ matrix.job.os }}-${{ matrix.job.name }}.zip
+            ${{ env.ASSET_SRC }}
+            ${{ env.ASSET_SRC1 }}
