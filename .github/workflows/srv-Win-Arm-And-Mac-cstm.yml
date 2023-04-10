@@ -1,4 +1,4 @@
-﻿# 2023-04-10 23:30 - runs-on: ubuntu-20.04
+# 2023-04-10 23:30 - runs-on: ubuntu-20.04
 name: srv-Win-Arm-And-Mac-cstm
 
 # ------------- NOTE
@@ -33,7 +33,6 @@ env:
   RDSK_PCH_SH_CLN: '${{ secrets.RDSK_PCH_SH_CLN }}'
 
 jobs:
-
   # binary build
   build:
 
@@ -43,13 +42,13 @@ jobs:
       fail-fast: false
       matrix:
         job:
-          - { name: "amd64",   target: "x86_64-unknown-linux-musl" }
-          - { name: "arm64v8", target: "aarch64-unknown-linux-musl" }
+          - { name: "amd64",   target: "x86_64-unknown-linux-musl"      }
+          - { name: "arm64v8", target: "aarch64-unknown-linux-musl"     }
           - { name: "armv7",   target: "armv7-unknown-linux-musleabihf" }
-          - { name: "i386",    target: "i686-unknown-linux-musl" }
+          - { name: "i386",    target: "i686-unknown-linux-musl"        }
+          - { name: "amd64fb", target: "x86_64-unknown-freebsd"         }
 
     steps:
-      
       - name: Checkout
         uses: deep-soft/checkout@v3
 
@@ -143,7 +142,7 @@ jobs:
       - name: Install toolchain
         uses: deep-soft/rust-toolchain@master
         with:
-          toolchain: "1.62"
+          toolchain: "1.67.1"
           override: true
           default: true
           components: rustfmt
@@ -151,6 +150,7 @@ jobs:
           target: ${{ matrix.job.target }}
 
       - name: Build
+        #uses: actions-rs/cargo@v1
         uses: deep-soft/rust-cargo@master
         with:
           command: build
@@ -179,12 +179,12 @@ jobs:
             ${{ env.ASSET_SRC }}
             ${{ env.ASSET_SRC1 }}
 
+
   build-win:
     name: Build - windows
-#    runs-on: windows-2019 
-    runs-on: windows-2022
+    runs-on: windows-2019
+
     steps:
-      
       - name: Checkout
         uses: deep-soft/checkout@v3
 
@@ -369,8 +369,9 @@ jobs:
           - { os: "linux", name: "arm64v8" }
           - { os: "linux", name: "armv7" }
           - { os: "linux", name: "i386" }
+          - { os: "linux", name: "amd64fb" }
           - { os: "windows", name: "x86_64" }
-
+          
     steps:
 
       - name: Download binaries (${{ matrix.job.os }} - ${{ matrix.job.name }})
