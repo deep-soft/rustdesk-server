@@ -1,3 +1,4 @@
+﻿# 2023-04-10 23:30 - runs-on: ubuntu-20.04
 name: srv-Win-Arm-And-Mac-cstm
 
 # ------------- NOTE
@@ -37,7 +38,7 @@ jobs:
   build:
 
     name: Build - ${{ matrix.job.name }}
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     strategy:
       fail-fast: false
       matrix:
@@ -352,14 +353,14 @@ jobs:
             ${{ env.ASSET_SRC }}
             ${{ env.ASSET_SRC1 }}
 
-  #�github (draft) release with all binaries
+  # github (draft) release with all binaries
   release:
 
     name: Github release
     needs: 
       - build
       - build-win
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     strategy:
       fail-fast: false
       matrix:
@@ -402,7 +403,7 @@ jobs:
 
     name: Docker push - ${{ matrix.job.name }}
     needs: build
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     strategy:
       fail-fast: false
       matrix:
@@ -549,7 +550,7 @@ jobs:
 
     name: Docker manifest
     needs: docker
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
 
     steps:
 
@@ -599,7 +600,7 @@ jobs:
 
     name: Docker push classic - ${{ matrix.job.name }}
     needs: build
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     strategy:
       fail-fast: false
       matrix:
