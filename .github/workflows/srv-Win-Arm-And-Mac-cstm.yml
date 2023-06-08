@@ -142,7 +142,7 @@ jobs:
       - name: Install toolchain
         uses: deep-soft/rust-toolchain@master
         with:
-          toolchain: "1.67.1"
+          toolchain: "1.70.0"
           override: true
           default: true
           components: rustfmt
@@ -269,7 +269,7 @@ jobs:
       - name: Install toolchain
         uses: deep-soft/rust-toolchain@master
         with:
-          toolchain: "1.62"
+          toolchain: "1.70.0"
           override: true
           default: true
           components: rustfmt
@@ -365,11 +365,11 @@ jobs:
       fail-fast: false
       matrix:
         job:
-          - { os: "linux", name: "amd64" }
-          - { os: "linux", name: "arm64v8" }
-          - { os: "linux", name: "armv7" }
-          - { os: "linux", name: "i386" }
-          - { os: "linux", name: "amd64fb" }
+          - { os: "linux",   name: "amd64" }
+          - { os: "linux",   name: "arm64v8" }
+          - { os: "linux",   name: "armv7" }
+          - { os: "linux",   name: "i386" }
+          - { os: "linux",   name: "amd64fb" }
           - { os: "windows", name: "x86_64" }
           
     steps:
