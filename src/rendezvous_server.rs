@@ -1,7 +1,7 @@
 use crate::common::*;
 use crate::peer::*;
 use hbb_common::{
-    allow_err,
+    allow_err, bail,
     bytes::{Bytes, BytesMut},
     bytes_codec::BytesCodec,
     config,
@@ -166,7 +166,19 @@ impl RendezvousServer {
                 test_addr.parse()?
             };
             tokio::spawn(async move {
-                allow_err!(test_hbbs(test_addr).await);
+                if let Err(err) = test_hbbs(test_addr).await {
+                    if test_addr.is_ipv6() && test_addr.ip().is_unspecified() {
+                        let mut test_addr = test_addr;
+                        test_addr.set_ip(IpAddr::V4(Ipv4Addr::UNSPECIFIED));
+                        if let Err(err) = test_hbbs(test_addr).await {
+                            log::error!("Failed to run hbbs test with {test_addr}: {err}");
+                            std::process::exit(1);
+                        }
+                    } else {
+                        log::error!("Failed to run hbbs test with {test_addr}: {err}");
+                        std::process::exit(1);
+                    }
+                }
             });
         };
         let main_task = async move {
@@ -706,17 +718,14 @@ impl RendezvousServer {
                 }
                 ph.nat_type = NatType::SYMMETRIC.into(); // will force relay
             }
-            let same_intranet = !ws
-                && match peer_addr {
-                    SocketAddr::V4(a) => match addr {
-                        SocketAddr::V4(b) => a.ip() == b.ip(),
+            let same_intranet: bool = !ws
+                && (peer_is_lan && is_lan || {
+                    match (peer_addr, addr) {
+                        (SocketAddr::V4(a), SocketAddr::V4(b)) => a.ip() == b.ip(),
+                        (SocketAddr::V6(a), SocketAddr::V6(b)) => a.ip() == b.ip(),
                         _ => false,
-                    },
-                    SocketAddr::V6(a) => match addr {
-                        SocketAddr::V6(b) => a.ip() == b.ip(),
-                        _ => false,
-                    },
-                };
+                    }
+                });
             let socket_addr = AddrMangle::encode(addr).into();
             if same_intranet {
                 log::debug!(
@@ -1188,8 +1197,16 @@ impl RendezvousServer {
     #[inline]
     fn is_lan(&self, addr: SocketAddr) -> bool {
         if let Some(network) = &self.inner.mask {
-            if let SocketAddr::V4(addr) = addr {
-                return network.contains(*addr.ip());
+            match addr {
+                SocketAddr::V4(v4_socket_addr) => {
+                    return network.contains(*v4_socket_addr.ip());
+                }
+
+                SocketAddr::V6(v6_socket_addr) => {
+                    if let Some(v4_addr) = v6_socket_addr.ip().to_ipv4_mapped() {
+                        return network.contains(v4_addr);
+                    }
+                }
             }
         }
         false
@@ -1225,6 +1242,15 @@ async fn check_relay_servers(rs0: Arc<RelayServers>, tx: Sender) {
 
 // temp solution to solve udp socket failure
 async fn test_hbbs(addr: SocketAddr) -> ResultType<()> {
+    let mut addr = addr;
+    if addr.ip().is_unspecified() {
+        addr.set_ip(if addr.is_ipv4() {
+            IpAddr::V4(Ipv4Addr::LOCALHOST)
+        } else {
+            IpAddr::V6(Ipv6Addr::LOCALHOST)
+        });
+    }
+
     let mut socket = FramedSocket::new(config::Config::get_any_listen_addr(addr.is_ipv4())).await?;
     let mut msg_out = RendezvousMessage::new();
     msg_out.set_register_peer(RegisterPeer {
@@ -1238,8 +1264,7 @@ async fn test_hbbs(addr: SocketAddr) -> ResultType<()> {
         tokio::select! {
           _ = timer.tick() => {
               if last_time_recv.elapsed().as_secs() > 12 {
-                 log::error!("Timeout of test_hbbs");
-                 std::process::exit(1);
+                  bail!("Timeout of test_hbbs");
               }
               socket.send(&msg_out, addr).await?;
           }
