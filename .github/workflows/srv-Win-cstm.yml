@@ -1,3 +1,4 @@
+#2023-06-08 17:50
 name: srv-Win-cstm
 
 #
@@ -116,7 +117,7 @@ jobs:
       - name: Install toolchain
         uses: deep-soft/rust-toolchain@master
         with:
-          toolchain: "1.62"
+          toolchain: "1.70.0"
           override: true
           default: true
           components: rustfmt
@@ -200,7 +201,7 @@ jobs:
             ${{ env.ASSET_SRC }}
             ${{ env.ASSET_SRC1 }}
 
-  # github (draft) release with all binaries
+  #Â github (draft) release with all binaries
   release:
 
     name: Github release
