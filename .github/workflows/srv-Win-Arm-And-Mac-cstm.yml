@@ -1,4 +1,6 @@
-# 2023-07-06 13:10 - runs-on: ubuntu-20.04
+# 2023-11-26 19:30
+# runs-on: ubuntu-20.04
+# change src and src1 archive
 name: srv-Win-Arm-And-Mac-cstm
 
 # ------------- NOTE
@@ -72,6 +74,20 @@ jobs:
           fi
           #ls -l ${{ env.ASSET_SRC }} 
 
+      - name: Create source archive
+        # archive name is ${{ env.ZIP_RELEASE_ARCHIVE }}
+        continue-on-error: true
+        uses: deep-soft/zip-release@v2
+        with:
+          type: 'tar.xz'
+          filename: 'rdsk-srv-src-${{ env.VERSION }}-${{ matrix.job.name }}'
+          directory: '.'
+          path: '.'
+          exclusions: ''
+          recursive_exclusions: ''
+          env_variable: ASSET_SRC
+          # default env_variable: ZIP_RELEASE_ARCHIVE
+
       - name: Prepare for patch 1
         continue-on-error: true
         shell: bash
@@ -110,24 +126,18 @@ jobs:
           bash ./RDSK_PCH_SH_CLN.sh
 
       - name: Create source archive 1
+        # archive name is ${{ env.ZIP_RELEASE_ARCHIVE }}
         continue-on-error: true
-        shell: bash
-        run: |
-          staging="rdsk-srv-src1-${{ env.VERSION }}-${{ matrix.job.name }}"
-          if [ "${{ matrix.os }}" = "windows-2022" ]; then
-            7z a "$staging.zip" "*" > nul
-            echo "ASSET_SRC1=$staging.zip" >> $GITHUB_ENV
-            echo "source archive name:"
-            ls -l "$staging.zip"
-          else
-            touch "$staging.tar.xz"
-            #tar -cfJ "$staging.tar.xz" --exclude "$staging.tar.xz" .
-            tar --exclude=*.tar* -cv . | xz -9 > "$staging.tar.xz"
-            echo "ASSET_SRC1=$staging.tar.xz" >> $GITHUB_ENV
-            echo "source archive name: "
-            ls -l "$staging.tar.xz"
-          fi
-          ls -l ${{ env.ASSET_SRC1 }} 
+        uses: deep-soft/zip-release@v2
+        with:
+          type: 'tar.xz'
+          filename: 'rdsk-srv-src1-${{ env.VERSION }}-${{ matrix.job.name }}'
+          directory: '.'
+          path: '.'
+          exclusions: ''
+          recursive_exclusions: ''
+          env_variable: ASSET_SRC1
+          # default env_variable: ZIP_RELEASE_ARCHIVE
 
       - name: Publish src archives
         continue-on-error: true
@@ -188,16 +198,19 @@ jobs:
       - name: Checkout
         uses: deep-soft/checkout@v3
 
-      - name: Create source archive  
+      - name: Create source archive
+        # archive name is ${{ env.ZIP_RELEASE_ARCHIVE }}
         continue-on-error: true
-        shell: bash
-        run: |
-          staging="rdsk-srv-src-${{ env.VERSION }}-win"
-          7z a "$staging.zip" "*"
-          echo "ASSET_SRC=$staging.zip" >> $GITHUB_ENV
-          echo "source archive name:"
-          ls -l "$staging.zip"
-          #ls -l ${{ env.ASSET_SRC }} 
+        uses: deep-soft/zip-release@v2
+        with:
+          type: 'tar.xz'
+          filename: 'rdsk-srv-src-${{ env.VERSION }}-win'
+          directory: '.'
+          path: '.'
+          exclusions: ''
+          recursive_exclusions: ''
+          env_variable: ASSET_SRC
+          # default env_variable: ZIP_RELEASE_ARCHIVE
 
       - name: Prepare for patch 1
         continue-on-error: true
@@ -237,24 +250,18 @@ jobs:
           bash ./RDSK_PCH_SH_CLN.sh
 
       - name: Create source archive 1
+        # archive name is ${{ env.ZIP_RELEASE_ARCHIVE }}
         continue-on-error: true
-        shell: bash
-        run: |
-          staging="rdsk-srv-src1-${{ env.VERSION }}-win"
-          if [ "${{ matrix.os }}" = "windows-2022" ]; then
-            7z a "$staging.zip" "*" > nul
-            echo "ASSET_SRC1=$staging.zip" >> $GITHUB_ENV
-            echo "source archive name:"
-            ls -l "$staging.zip"
-          else
-            touch "$staging.tar.xz"
-            #tar -cfJ "$staging.tar.xz" --exclude "$staging.tar.xz" .
-            tar --exclude=*.tar* -cv . | xz -9 > "$staging.tar.xz"
-            echo "ASSET_SRC1=$staging.tar.xz" >> $GITHUB_ENV
-            echo "source archive name: "
-            ls -l "$staging.tar.xz"
-          fi
-          ls -l ${{ env.ASSET_SRC1 }} 
+        uses: deep-soft/zip-release@v2
+        with:
+          type: 'tar.xz'
+          filename: 'rdsk-srv-src1-${{ env.VERSION }}-win'
+          directory: '.'
+          path: '.'
+          exclusions: ''
+          recursive_exclusions: ''
+          env_variable: ASSET_SRC1
+          # default env_variable: ZIP_RELEASE_ARCHIVE
 
       - name: Publish src archives
         continue-on-error: true
@@ -415,29 +422,22 @@ jobs:
           - { name: "i386",    docker_platform: "linux/386",    s6_platform: "i686" }
 
     steps:
-
       - name: Checkout
         uses: deep-soft/checkout@v3
 
-      - name: Create source archive  
+      - name: Create source archive
+        # archive name is ${{ env.ZIP_RELEASE_ARCHIVE }}
         continue-on-error: true
-        shell: bash
-        run: |
-          staging="rdsk-srv-src-${{ env.VERSION }}-${{ matrix.job.name }}"
-          if [ "${{ matrix.os }}" = "windows-2022" ]; then
-            7z a "$staging.zip" "*"
-            echo "ASSET_SRC=$staging.zip" >> $GITHUB_ENV
-            echo "source archive name:"
-            ls -l "$staging.zip"
-          else
-            touch "$staging.tar.xz"
-            #tar -cfJ "$staging.tar.xz" --exclude "$staging.tar.xz" .
-            tar --exclude=*.tar* -cv . | xz -9 > "$staging.tar.xz"
-            echo "ASSET_SRC=$staging.tar.xz" >> $GITHUB_ENV
-            echo "source archive name: "
-            ls -l "$staging.tar.xz"
-          fi
-          #ls -l ${{ env.ASSET_SRC }} 
+        uses: deep-soft/zip-release@v2
+        with:
+          type: 'tar.xz'
+          filename: 'rdsk-srv-src-${{ env.VERSION }}-${{ matrix.job.name }}'
+          directory: '.'
+          path: '.'
+          exclusions: ''
+          recursive_exclusions: ''
+          env_variable: ASSET_SRC
+          # default env_variable: ZIP_RELEASE_ARCHIVE
 
       - name: Prepare for patch 1
         continue-on-error: true
@@ -477,24 +477,18 @@ jobs:
           bash ./RDSK_PCH_SH_CLN.sh
 
       - name: Create source archive 1
+        # archive name is ${{ env.ZIP_RELEASE_ARCHIVE }}
         continue-on-error: true
-        shell: bash
-        run: |
-          staging="rdsk-srv-src1-${{ env.VERSION }}-${{ matrix.job.name }}"
-          if [ "${{ matrix.os }}" = "windows-2022" ]; then
-            7z a "$staging.zip" "*" > nul
-            echo "ASSET_SRC1=$staging.zip" >> $GITHUB_ENV
-            echo "source archive name:"
-            ls -l "$staging.zip"
-          else
-            touch "$staging.tar.xz"
-            #tar -cfJ "$staging.tar.xz" --exclude "$staging.tar.xz" .
-            tar --exclude=*.tar* -cv . | xz -9 > "$staging.tar.xz"
-            echo "ASSET_SRC1=$staging.tar.xz" >> $GITHUB_ENV
-            echo "source archive name: "
-            ls -l "$staging.tar.xz"
-          fi
-          ls -l ${{ env.ASSET_SRC1 }} 
+        uses: deep-soft/zip-release@v2
+        with:
+          type: 'tar.xz'
+          filename: 'rdsk-srv-src1-${{ env.VERSION }}-${{ matrix.job.name }}'
+          directory: '.'
+          path: '.'
+          exclusions: ''
+          recursive_exclusions: ''
+          env_variable: ASSET_SRC1
+          # default env_variable: ZIP_RELEASE_ARCHIVE
 
       - name: Download binaries
         uses: deep-soft/download-artifact@main
@@ -554,7 +548,6 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-
       - name: Log in to Docker Hub
         if: github.event_name != 'pull_request'
         uses: docker/login-action@v2
@@ -598,7 +591,6 @@ jobs:
 
   # docker build and push of classic images
   docker-classic:
-
     name: Docker push classic - ${{ matrix.job.name }}
     needs: build
     runs-on: ubuntu-20.04
@@ -611,29 +603,22 @@ jobs:
           - { name: "armv7",   docker_platform: "linux/arm/v7", tag: "latest-armv7"   }
 
     steps:
-
       - name: Checkout
         uses: deep-soft/checkout@v3
 
-      - name: Create source archive  
+      - name: Create source archive
+        # archive name is ${{ env.ZIP_RELEASE_ARCHIVE }}
         continue-on-error: true
-        shell: bash
-        run: |
-          staging="rdsk-srv-src-${{ env.VERSION }}-${{ matrix.job.name }}"
-          if [ "${{ matrix.os }}" = "windows-2022" ]; then
-            7z a "$staging.zip" "*"
-            echo "ASSET_SRC=$staging.zip" >> $GITHUB_ENV
-            echo "source archive name:"
-            ls -l "$staging.zip"
-          else
-            touch "$staging.tar.xz"
-            #tar -cfJ "$staging.tar.xz" --exclude "$staging.tar.xz" .
-            tar --exclude=*.tar* -cv . | xz -9 > "$staging.tar.xz"
-            echo "ASSET_SRC=$staging.tar.xz" >> $GITHUB_ENV
-            echo "source archive name: "
-            ls -l "$staging.tar.xz"
-          fi
-          #ls -l ${{ env.ASSET_SRC }} 
+        uses: deep-soft/zip-release@v2
+        with:
+          type: 'tar.xz'
+          filename: 'rdsk-srv-src-${{ env.VERSION }}-${{ matrix.job.name }}'
+          directory: '.'
+          path: '.'
+          exclusions: ''
+          recursive_exclusions: ''
+          env_variable: ASSET_SRC
+          # default env_variable: ZIP_RELEASE_ARCHIVE
 
       - name: Prepare for patch 1
         continue-on-error: true
@@ -673,24 +658,18 @@ jobs:
           bash ./RDSK_PCH_SH_CLN.sh
 
       - name: Create source archive 1
+        # archive name is ${{ env.ZIP_RELEASE_ARCHIVE }}
         continue-on-error: true
-        shell: bash
-        run: |
-          staging="rdsk-srv-src1-${{ env.VERSION }}-${{ matrix.job.name }}"
-          if [ "${{ matrix.os }}" = "windows-2022" ]; then
-            7z a "$staging.zip" "*" > nul
-            echo "ASSET_SRC1=$staging.zip" >> $GITHUB_ENV
-            echo "source archive name:"
-            ls -l "$staging.zip"
-          else
-            touch "$staging.tar.xz"
-            #tar -cfJ "$staging.tar.xz" --exclude "$staging.tar.xz" .
-            tar --exclude=*.tar* -cv . | xz -9 > "$staging.tar.xz"
-            echo "ASSET_SRC1=$staging.tar.xz" >> $GITHUB_ENV
-            echo "source archive name: "
-            ls -l "$staging.tar.xz"
-          fi
-          ls -l ${{ env.ASSET_SRC1 }} 
+        uses: deep-soft/zip-release@v2
+        with:
+          type: 'tar.xz'
+          filename: 'rdsk-srv-src1-${{ env.VERSION }}-${{ matrix.job.name }}'
+          directory: '.'
+          path: '.'
+          exclusions: ''
+          recursive_exclusions: ''
+          env_variable: ASSET_SRC1
+          # default env_variable: ZIP_RELEASE_ARCHIVE
 
       - name: Download binaries
         uses: deep-soft/download-artifact@main
@@ -742,13 +721,10 @@ jobs:
 
 # docker build and push of multiarch images
   docker-manifest-classic:
-
     name: Docker manifest
     needs: docker
     runs-on: ubuntu-22.04
-
     steps:
-
       - name: Log in to Docker Hub
         if: github.event_name != 'pull_request'
         uses: docker/login-action@v2
@@ -790,7 +766,6 @@ jobs:
           push: true
 
   deb-package:
-
     name: debian package - ${{ matrix.job.name }}
     needs: build
     runs-on: ubuntu-22.04
@@ -804,29 +779,22 @@ jobs:
           - { name: "i386",    debian_platform: "i386",    crossbuild_package: "crossbuild-essential-i386" }
 
     steps:
-
       - name: Checkout
         uses: deep-soft/checkout@v3
 
-      - name: Create source archive  
+      - name: Create source archive
+        # archive name is ${{ env.ZIP_RELEASE_ARCHIVE }}
         continue-on-error: true
-        shell: bash
-        run: |
-          staging="rdsk-srv-src-${{ env.VERSION }}-${{ matrix.job.name }}"
-          if [ "${{ matrix.os }}" = "windows-2022" ]; then
-            7z a "$staging.zip" "*"
-            echo "ASSET_SRC=$staging.zip" >> $GITHUB_ENV
-            echo "source archive name:"
-            ls -l "$staging.zip"
-          else
-            touch "$staging.tar.xz"
-            #tar -cfJ "$staging.tar.xz" --exclude "$staging.tar.xz" .
-            tar --exclude=*.tar* -cv . | xz -9 > "$staging.tar.xz"
-            echo "ASSET_SRC=$staging.tar.xz" >> $GITHUB_ENV
-            echo "source archive name: "
-            ls -l "$staging.tar.xz"
-          fi
-          #ls -l ${{ env.ASSET_SRC }} 
+        uses: deep-soft/zip-release@v2
+        with:
+          type: 'tar.xz'
+          filename: 'rdsk-srv-src-${{ env.VERSION }}-${{ matrix.job.name }}'
+          directory: '.'
+          path: '.'
+          exclusions: ''
+          recursive_exclusions: ''
+          env_variable: ASSET_SRC
+          # default env_variable: ZIP_RELEASE_ARCHIVE
 
       - name: Prepare for patch 1
         continue-on-error: true
@@ -866,24 +834,18 @@ jobs:
           bash ./RDSK_PCH_SH_CLN.sh
 
       - name: Create source archive 1
+        # archive name is ${{ env.ZIP_RELEASE_ARCHIVE }}
         continue-on-error: true
-        shell: bash
-        run: |
-          staging="rdsk-srv-src1-${{ env.VERSION }}-${{ matrix.job.name }}"
-          if [ "${{ matrix.os }}" = "windows-2022" ]; then
-            7z a "$staging.zip" "*" > nul
-            echo "ASSET_SRC1=$staging.zip" >> $GITHUB_ENV
-            echo "source archive name:"
-            ls -l "$staging.zip"
-          else
-            touch "$staging.tar.xz"
-            #tar -cfJ "$staging.tar.xz" --exclude "$staging.tar.xz" .
-            tar --exclude=*.tar* -cv . | xz -9 > "$staging.tar.xz"
-            echo "ASSET_SRC1=$staging.tar.xz" >> $GITHUB_ENV
-            echo "source archive name: "
-            ls -l "$staging.tar.xz"
-          fi
-          ls -l ${{ env.ASSET_SRC1 }} 
+        uses: deep-soft/zip-release@v2
+        with:
+          type: 'tar.xz'
+          filename: 'rdsk-srv-src1-${{ env.VERSION }}-${{ matrix.job.name }}'
+          directory: '.'
+          path: '.'
+          exclusions: ''
+          recursive_exclusions: ''
+          env_variable: ASSET_SRC1
+          # default env_variable: ZIP_RELEASE_ARCHIVE
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
