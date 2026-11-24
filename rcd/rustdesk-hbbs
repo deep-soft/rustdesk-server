@@ -9,6 +9,8 @@
 #
 # rustdesk_hbbs_enable (bool):            Set to NO by default.
 #               Set it to YES to enable rustdesk_hbbs.
+# rustdesk_hbbs_ip (string):              Set IP address/hostname of relay server to use
+#               Defaults to "127.0.0.1", please replace with your server hostname/IP.
 # rustdesk_hbbs_args (string):            Set extra arguments to pass to rustdesk_hbbs
 #               Default is "-r ${rustdesk_hbbs_ip} -k _".
 # rustdesk_hbbs_user (string):            Set user that rustdesk_hbbs will run under
@@ -35,7 +37,7 @@ command=/usr/sbin/daemon
 procname=/usr/local/sbin/hbbs
 rustdesk_hbbs_chdir=/var/db/rustdesk-server
 command_args="-p ${pidfile} -o /var/log/rustdesk-hbbs.log ${procname} ${rustdesk_hbbs_args}"
-## If you want the daemon do its log over syslog comment out the above line and remove the comment from the below replacement
+## If you want the daemon to do its log over syslog, comment out the above line and remove the comment from the below replacement
 #command_args="-p ${pidfile} -T ${name} ${procname} ${rustdesk_hbbs_args}"
 
 start_precmd=rustdesk_hbbs_startprecmd
